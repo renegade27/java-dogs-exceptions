@@ -1,5 +1,8 @@
-package com.lambdaschool.dogsinitial;
+package com.lambdaschool.dogsinitial.controller;
 
+import com.lambdaschool.dogsinitial.exception.ResNotFoundException;
+import com.lambdaschool.dogsinitial.model.Dog;
+import com.lambdaschool.dogsinitial.DogsinitialApplication;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,29 +14,34 @@ import java.util.ArrayList;
 
 @RestController
 @RequestMapping("/dogs")
-public class DogController
-{
+public class DogController {
     // localhost:8080/dogs/dogs
     @GetMapping(value = "/dogs")
-    public ResponseEntity<?> getAllDogs()
-    {
+    public ResponseEntity<?> getAllDogs() {
         return new ResponseEntity<>(DogsinitialApplication.ourDogList.dogList, HttpStatus.OK);
     }
 
     // localhost:8080/dogs/{id}
     @GetMapping(value = "/{id}")
-    public ResponseEntity<?> getDogDetail(@PathVariable long id)
-    {
-        Dog rtnDog = DogsinitialApplication.ourDogList.findDog(d -> (d.getId() == id));
+    public ResponseEntity<?> getDogDetail(@PathVariable long id) {
+        Dog rtnDog;
+        if(DogsinitialApplication.ourDogList.findDog(d -> (d.getId() == id)) == null) {
+            throw new ResNotFoundException("Dog with id " + id + " not found");
+        } else{
+            rtnDog = DogsinitialApplication.ourDogList.findDog(d -> (d.getId() == id));
+        }
         return new ResponseEntity<>(rtnDog, HttpStatus.OK);
     }
 
     // localhost:8080/dogs/breeds/{breed}
     @GetMapping(value = "/breeds/{breed}")
-    public ResponseEntity<?> getDogBreeds (@PathVariable String breed)
-    {
+    public ResponseEntity<?> getDogBreeds (@PathVariable String breed) {
         ArrayList<Dog> rtnDogs = DogsinitialApplication.ourDogList.
                 findDogs(d -> d.getBreed().toUpperCase().equals(breed.toUpperCase()));
+        if (rtnDogs.size() == 0)
+        {
+            throw new ResNotFoundException("No employees fname start with " + breed);
+        }
         return new ResponseEntity<>(rtnDogs, HttpStatus.OK);
     }
 }
