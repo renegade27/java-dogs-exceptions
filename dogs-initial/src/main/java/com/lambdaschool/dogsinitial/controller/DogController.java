@@ -9,8 +9,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.ModelAndView;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/dogs")
@@ -43,5 +46,19 @@ public class DogController {
             throw new ResNotFoundException("No employees fname start with " + breed);
         }
         return new ResponseEntity<>(rtnDogs, HttpStatus.OK);
+    }
+
+    // localhost:8080/dogs/dogtable
+    @GetMapping(value = "/dogtable", produces={"application/json"})
+    public ModelAndView displayDogTable()
+    {
+        ArrayList<Dog> dogList2 = new ArrayList<>();
+        DogsinitialApplication.ourDogList.dogList.sort((d1, d2) -> d1.getBreed().compareToIgnoreCase(d2.getBreed()));
+        dogList2 = DogsinitialApplication.ourDogList.findDogs((d) -> d.isApartmentSuitable());
+        ModelAndView mav = new ModelAndView();
+        mav.setViewName("dogs");
+        mav.addObject("dogList1", DogsinitialApplication.ourDogList.dogList);
+        mav.addObject("dogList2", dogList2);
+        return mav;
     }
 }
